@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#08080C" />
+<title>intranet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#08080C; --bg-card:rgba(20,22,30,0.55);
+    --lime:#C8FF4D; --lime-deep:#9EE600; --term:#5DFF6E; --violet:#8A7BFF; --violet-soft:#B7AEFF;
+    --text:#F4F5F7; --muted:#9AA0AD; --muted-2:#626776; --border:rgba(255,255,255,0.08);
+    --strip:#B65CFF;
+    --radius:12px;
+    --font:'JetBrains Mono','Fira Code',ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  body{
+    font-family:var(--font);color:var(--text);min-height:100vh;line-height:1.5;
+    background:
+      radial-gradient(800px 420px at 8% -10%, rgba(200,255,77,0.10), transparent 60%),
+      radial-gradient(720px 460px at 96% 4%, rgba(138,123,255,0.14), transparent 60%),
+      var(--bg);
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.40;
+    background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:46px 46px;mask-image:radial-gradient(circle at 50% 28%,#000 30%,transparent 82%)}
+  .wrap{max-width:1080px;margin:0 auto;padding:22px 18px 0;position:relative;z-index:1}
+  /* terminal window header */
+  .term{background:var(--bg-card);backdrop-filter:blur(10px);border:1px solid var(--border);
+    border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:10px 14px;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
+  .term-bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .term-bar i:nth-child(1){background:#ff5f56}.term-bar i:nth-child(2){background:#ffbd2e}
+  .term-bar i:nth-child(3){background:#27c93f}
+  .term-bar .tt{margin-left:8px;color:var(--muted-2);font-size:.72rem;letter-spacing:.5px}
+  .term-body{padding:16px 18px}
+  .brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .logo{width:30px;height:30px;border-radius:8px;flex:0 0 auto;display:grid;place-items:center;
+    font-weight:700;font-size:.82rem;color:#08080C;line-height:1;
+    background:linear-gradient(110deg,var(--lime) 12%,var(--violet-soft) 96%);
+    box-shadow:0 6px 16px rgba(138,123,255,.28)}
+  .logo .cu{display:inline-block;width:.5em;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
+  h1{font-size:1.15rem;margin:0;letter-spacing:.5px;font-weight:700;line-height:1}
+  .grad{background:linear-gradient(110deg,var(--lime),var(--violet-soft));-webkit-background-clip:text;
+    background-clip:text;color:transparent}
+  .cursor{color:var(--lime);animation:blink 1s steps(2) infinite}
+  .server-meta{margin-top:14px;display:flex;gap:7px;flex-wrap:wrap}
+  .chip{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);
+    padding:4px 9px;border-radius:6px;font-size:.68rem;letter-spacing:.3px}
+  .chip b{color:var(--text);font-weight:500}
+  /* digital clock */
+  .clock{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;align-self:center}
+  .clk-date{color:var(--violet-soft);font-size:.68rem;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:4px}
+  .clk-time{display:flex;align-items:center;justify-content:flex-end;gap:2px}
+  .seg{font-size:1.5rem;font-weight:700;color:var(--term);min-width:2ch;text-align:center;
+    text-shadow:0 0 12px rgba(93,255,110,0.3)}
+  .sep{color:var(--term);font-size:1.35rem;font-weight:700;animation:blink 1s steps(2) infinite;
+    text-shadow:0 0 12px rgba(93,255,110,0.3);margin:-2px 2px 0}
+  .clk-tz{color:var(--muted-2);font-size:.6rem;letter-spacing:.6px;margin-top:2px}
+  .clk-tz::before{content:"◷ "}
+  main{max-width:1080px;margin:0 auto;padding:22px 18px 50px;position:relative;z-index:1}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;color:var(--muted);font-size:.7rem;align-items:center}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .switch{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+  .switch button{background:var(--bg-card);border:1px solid var(--border);color:var(--muted);
+    padding:4px 10px;border-radius:6px;font-size:.66rem;cursor:pointer;font-family:var(--font);transition:.15s}
+  .switch button:hover{color:var(--text);border-color:var(--violet-soft)}
+  .switch button.active{color:var(--lime-deep);border-color:var(--lime);background:rgba(200,255,77,.10)}
+  .grid{display:grid;gap:13px;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr))}
+  .card{background:var(--bg-card);backdrop-filter:blur(8px);border:1px solid var(--border);
+    border-radius:var(--radius);padding:30px 15px 15px;display:flex;flex-direction:column;gap:9px;
+    text-decoration:none;color:inherit;position:relative;overflow:hidden;
+    transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease,background .15s ease}
+  .card:hover{transform:translateY(-2px);border-color:var(--accent);background:rgba(20,22,30,0.78);
+    box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 40%,transparent),0 14px 34px rgba(0,0,0,.45)}
+  .card::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;opacity:.95;background:var(--strip)}
+  .row{display:flex;align-items:center;gap:12px}
+  .ic{width:42px;height:42px;border-radius:10px;flex:0 0 auto;display:grid;place-items:center;
+    background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--accent)}
+  .ic svg{width:23px;height:23px;display:block}
+  .name{font-weight:700;font-size:.96rem;margin:0;letter-spacing:.3px;color:var(--term)}
+  .desc{color:var(--muted);font-size:.72rem;margin:2px 0 0;flex:1;font-weight:400;line-height:1.45}
+  .meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:auto}
+  .badge{font-size:.64rem;padding:3px 7px;border-radius:5px;letter-spacing:.4px;
+    background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted)}
+  .badge.ss{color:var(--violet-soft);border-color:rgba(138,123,255,.35);background:rgba(138,123,255,.10);cursor:help}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:0 0 auto}
+  .dot.on{background:var(--term);box-shadow:0 0 10px rgba(93,255,110,.7)}
+  .dot.off{background:#f85149;box-shadow:0 0 10px rgba(248,81,73,.5)}
+  .dot.check{background:var(--lime);animation:pulse 1.2s infinite}
+  @keyframes pulse{50%{opacity:.3}}
+  .tag{position:absolute;top:11px;right:11px;font-size:.58rem;letter-spacing:.6px;text-transform:uppercase;
+    color:var(--muted-2);background:rgba(255,255,255,.04);border:1px solid var(--border);
+    padding:2px 6px;border-radius:5px}
+  .url{font-size:.6rem;color:var(--lime);word-break:break-all;opacity:.7;margin-top:2px}
+  .url .pfx{color:var(--muted-2)}
+  footer{max-width:1080px;margin:0 auto;padding:0 18px 36px;color:var(--muted-2);font-size:.66rem;
+    position:relative;z-index:1}
+
+  @media (max-width:680px){
+    .clock{margin-left:0;text-align:left;align-self:flex-start;width:100%}
+    .clk-time{justify-content:flex-start}
+    .seg{font-size:1.35rem} .sep{font-size:1.2rem}
+    .switch{width:100%;margin:8px 0 0}
+    .switch button{padding:7px 12px;font-size:.7rem;flex:1;justify-content:center}
+  }
+  @media (max-width:520px){
+    .wrap{padding:14px 12px 0}
+    main{padding:16px 12px 40px}
+    .term-body{padding:14px}
+    h1{font-size:1.02rem}
+    .grid{gap:11px;grid-template-columns:1fr}
+    .card{padding:26px 13px 13px}
+    .ic{width:38px;height:38px}
+    .ic svg{width:21px;height:21px}
+    .legend{font-size:.66rem;gap:10px}
+  }
+  @media (max-width:400px){
+    .wrap{padding:12px 10px 0}
+    main{padding:14px 10px 36px}
+    .term-body{padding:12px}
+    .brand{gap:10px}
+    h1{font-size:.95rem}
+    .logo{width:28px;height:28px;font-size:.76rem}
+    .seg{font-size:1.15rem} .sep{font-size:1rem}
+    .clk-date{font-size:.62rem}
+    .chip{font-size:.62rem;padding:3px 7px}
+    .name{font-size:.88rem}
+    .desc{font-size:.68rem}
+    .url{font-size:.56rem}
+    .tag{font-size:.54rem;padding:2px 5px}
+  }
+  @media (max-width:340px){
+    .term-bar .tt{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i><span class="tt">intranet</span></div>
+    <div class="term-body">
+      <div class="brand">
+        <div class="logo">›<span class="cu">_</span></div>
+        <h1><span class="grad">intranet</span><span class="cursor">_</span></h1>
+        <div class="clock">
+          <div class="clk-date" id="clk-date">—</div>
+          <div class="clk-time">
+            <span class="seg" id="hh">00</span><span class="sep">:</span><span class="seg" id="mm">00</span><span class="sep">:</span><span class="seg" id="ss">00</span>
+          </div>
+          <div class="clk-tz" id="clk-tz">—</div>
+        </div>
+      </div>
+      <div class="server-meta">
+        <span class="chip">ip: <b id="chip-ip">—</b></span>
+        <span class="chip">net: <b id="chip-net">—</b></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="legend">
+    <span><i class="dot on"></i> online</span>
+    <span><i class="dot check"></i> probing…</span>
+    <span><i class="dot off"></i> offline</span>
+    <div class="switch" id="netSwitch"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>Stato verificato dal browser (best-effort) · stile onexus.it</footer>
+
+<script>
+const NETWORKS = [
+  { key:"eth",  label:"ethernet", ip:"192.168.200.2" },
+  { key:"wifi", label:"wifi",     ip:"172.20.10.4"   },
+  { key:"vpn",  label:"vpn",      ip:"100.99.111.54" },
+];
+const hostIP = (location.hostname && location.hostname !== "localhost" && !location.hostname.startsWith("127."))
+  ? location.hostname : NETWORKS[0].ip;
+let SERVER = hostIP;
+const netFor = ip => (NETWORKS.find(n => n.ip === ip) || {}).label || "—";
+function paintHeader(){
+  document.getElementById("chip-ip").textContent = SERVER;
+  document.getElementById("chip-net").textContent = netFor(SERVER);
+  document.title = `intranet (${netFor(SERVER)})`;
+}
+paintHeader();
+
+const sw = document.getElementById("netSwitch");
+NETWORKS.forEach(n => {
+  const b = document.createElement("button");
+  b.textContent = n.label;
+  if (n.ip === SERVER) b.classList.add("active");
+  b.onclick = () => { SERVER = n.ip; paintHeader();
+    [...sw.children].forEach(x => x.classList.remove("active")); b.classList.add("active"); render(); };
+  sw.appendChild(b);
+});
+
+const SVG = {
+  nextcloud:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.018 6.537c-2.5 0-4.6 1.712-5.241 4.015-.56-1.232-1.793-2.105-3.225-2.105A3.569 3.569 0 0 0 0 12a3.569 3.569 0 0 0 3.552 3.553c1.432 0 2.664-.874 3.224-2.106.641 2.304 2.742 4.016 5.242 4.016 2.487 0 4.576-1.693 5.231-3.977.569 1.21 1.783 2.067 3.198 2.067A3.568 3.568 0 0 0 24 12a3.569 3.569 0 0 0-3.553-3.553c-1.416 0-2.63.858-3.199 2.067-.654-2.284-2.743-3.978-5.23-3.977zm0 2.085c1.878 0 3.378 1.5 3.378 3.378 0 1.878-1.5 3.378-3.378 3.378A3.362 3.362 0 0 1 8.641 12c0-1.878 1.5-3.378 3.377-3.378zm-8.466 1.91c.822 0 1.467.645 1.467 1.468s-.644 1.467-1.467 1.468A1.452 1.452 0 0 1 2.085 12c0-.823.644-1.467 1.467-1.467zm16.895 0c.823 0 1.468.645 1.468 1.468s-.645 1.468-1.468 1.468A1.452 1.452 0 0 1 18.98 12c0-.823.644-1.467 1.467-1.467z"/></svg>`,
+  homeassistant:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.939 10.627 13.061.749a1.505 1.505 0 0 0-2.121 0l-9.879 9.878C.478 11.21 0 12.363 0 13.187v9c0 .826.675 1.5 1.5 1.5h9.227l-4.063-4.062a2.034 2.034 0 0 1-.664.113c-1.13 0-2.05-.92-2.05-2.05s.92-2.05 2.05-2.05 2.05.92 2.05 2.05c0 .233-.041.456-.113.665l3.163 3.163V9.928a2.05 2.05 0 0 1-1.15-1.84c0-1.13.92-2.05 2.05-2.05s2.05.92 2.05 2.05a2.05 2.05 0 0 1-1.15 1.84v8.127l3.146-3.146A2.051 2.051 0 0 1 18 12.239c1.13 0 2.05.92 2.05 2.05s-.92 2.05-2.05 2.05c-.25 0-.488-.047-.709-.13L12.9 20.602v3.088h9.6c.825 0 1.5-.675 1.5-1.5v-9c0-.825-.477-1.977-1.061-2.561z"/></svg>`,
+  jellyfin:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .002C8.826.002-1.398 18.537.16 21.666c1.56 3.129 22.14 3.094 23.682 0C25.384 18.573 15.177 0 12 0zm7.76 18.949c-1.008 2.028-14.493 2.05-15.514 0C3.224 16.9 9.92 4.755 12.003 4.755c2.081 0 8.77 12.166 7.759 14.196zM12 9.198c-1.054 0-4.446 6.15-3.93 7.189.518 1.04 7.348 1.027 7.86 0 .511-1.027-2.874-7.19-3.93-7.19z"/></svg>`,
+  portainer:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0v1.023l-.01-.015-6.106 3.526H3.417v.751h5.359v3.638h1.942V5.284h1.786v10.416c.027 0 .54-.01.751.091V5.285h.531v10.608c.293.147.55.312.751.54V5.286h6.046v-.75h-1.267l-6.061-3.5V0zm0 1.87v2.664H7.889zm.751.031l4.56 2.633h-4.56zM9.142 5.285h1.21v1.686h-1.21zm-4.736 2.73v1.951h1.942v-1.95zm2.19 0v1.951h1.941v-1.95zm-2.19 2.171v1.951h1.942v-1.95zm2.19 0v1.951h1.941v-1.95zm2.18 0v1.951h1.942v-1.95zM4.36 12.43a3.73 3.73 0 00-.494 1.851c0 1.227.604 2.308 1.52 2.986.239-.064.477-.1.724-.11.1 0 .165.01.266.019.284-1.191 1.383-1.988 2.665-1.988.724 0 1.438.201 1.924.668.229-.476.302-1.007.302-1.575 0-.65-.165-1.292-.494-1.85zm4.828 3.16c-1.21 0-2.226.844-2.492 1.97a.922.922 0 00-.275-.009 2.559 2.559 0 00-2.564 2.556 2.565 2.565 0 003.096 2.5A2.579 2.579 0 009.233 24c.862 0 1.622-.43 2.09-1.081a2.557 2.557 0 004.186-1.97c0-.567-.193-1.099-.504-1.52a2.557 2.557 0 00-3.866-2.94 2.574 2.574 0 00-1.951-.898z"/></svg>`,
+  navidrome:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+  cockpit:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.733 6.487c-.611.038-1.482.516-2.257 1.296L12.77 9.49 7.493 7.718 6.464 8.781l3.982 3.032-.884.884c-.315.313-.579.641-.781.961l-2.398-.178-.01.01-.587.587 1.838 1.347.547.405.405.547 1.347 1.839.588-.588.01-.01-.18-2.398c.32-.203.65-.467.962-.782l.884-.884 3.032 3.982 1.063-1.028-1.772-5.277 1.706-1.706c1.04-1.034 1.545-2.237 1.182-2.77a1 1 0 0 0-.068-.085c-.025-.025-.084-.067-.084-.067-.133-.09-.309-.127-.512-.115zm3.756-2.976C15.807-1.17 8.193-1.17 3.51 3.511c-4.682 4.682-4.681 12.296 0 16.978 4.682 4.681 12.296 4.682 16.978 0 4.681-4.682 4.681-12.296 0-16.978m-1.145 1.145a10.373 10.373 0 0 1 0 14.688 10.373 10.373 0 0 1-14.688 0 10.373 10.373 0 0 1 0-14.688 10.373 10.373 0 0 1 14.688 0z"/></svg>`,
+};
+
+const services = [
+  { name:"Nextcloud",      color:"#3B9CFF", port:443,  proto:"https", icon:SVG.nextcloud,     desc:"Cloud personale: file, calendari, contatti.",            tag:"snap" },
+  { name:"Home Assistant", color:"#18BCF2", port:8123, proto:"http",  icon:SVG.homeassistant, desc:"Domotica: luci, sensori, automazioni.",                 tag:"docker · host" },
+  { name:"Jellyfin",       color:"#B65CFF", port:8096, proto:"http",  icon:SVG.jellyfin,       desc:"Media server: film e serie TV.",                        tag:"docker · host" },
+  { name:"Navidrome",      color:"#F0506E", port:4533, proto:"http",  icon:SVG.navidrome,      desc:"Server musicale. Carica i brani da Nextcloud (Media/music).", tag:"docker · host" },
+  { name:"Portainer",      color:"#3DC6F6", port:9443, proto:"https", icon:SVG.portainer,      desc:"Gestione web dei container Docker.",                    tag:"docker" },
+  { name:"Cockpit",        color:"#5DD4E0", port:9090, proto:"https", icon:SVG.cockpit,        desc:"Gestione web del server: sistema, storage, terminale.", tag:"systemd" },
+];
+
+const grid = document.getElementById("grid");
+let cardList = [];
+function render(){
+  grid.innerHTML = ""; cardList = [];
+  services.forEach(s => {
+    const url = `${s.proto}://${SERVER}:${s.port}/`;
+    const a = document.createElement("a");
+    a.className = "card"; a.href = url;
+    a.style.setProperty("--accent", s.color);
+    if (s.proto === "https") a.title = "HTTPS con certificato self-signed: se il pallino risulta rosso su questo IP, apri il link e accetta il certificato (Avanzate → Procedi).";
+    const host = `${SERVER}:${s.port}`;
+    const pfx = `${s.proto}://`;
+    a.innerHTML = `
+      <span class="tag">${s.tag}</span>
+      <div class="row">
+        <div class="ic" style="color:${s.color}">${s.icon}</div>
+        <div><p class="name">${s.name}</p><p class="desc">${s.desc}</p></div>
+      </div>
+      <div class="meta">
+        <i class="dot check" data-dot></i>
+        <span class="badge">${s.proto} :${s.port}</span>
+        ${ s.proto === "https" ? `<span class="badge ss" title="Certificato self-signed: se il pallino è rosso su un IP nuovo, apri il link e accetta il cert (Avanzate → Procedi).">self-signed</span>` : "" }
+      </div>
+      <div class="url"><span class="pfx">${pfx}</span>${host}</div>
+    `;
+    grid.appendChild(a);
+    cardList.push({ url, dot:a.querySelector('[data-dot]'), badge:a.querySelector('.badge'), port:s.port });
+  });
+  cardList.forEach((_, i) => setTimeout(() => check(i), i*250));
+}
+function check(i){
+  const { url, dot, badge } = cardList[i];
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 3500);
+  fetch(url,{mode:'no-cors',signal:ctrl.signal,cache:'no-store'})
+    .then(()=>{ dot.classList.remove('check'); dot.classList.add('on');
+      if (badge){ badge.textContent = `${badge.textContent.split(':')[0]}:${cardList[i].port} ✓`; }})
+    .catch(()=>{ dot.classList.remove('check'); dot.classList.add('off'); })
+    .finally(()=>clearTimeout(t));
+}
+render();
+
+// digital clock
+(function(){
+  const $=id=>document.getElementById(id);
+  const hh=$('hh'),mm=$('mm'),ss=$('ss'),cd=$('clk-date'),ct=$('clk-tz');
+  const pad=n=>String(n).padStart(2,'0');
+  ct.textContent=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  function tick(){const d=new Date();
+    hh.textContent=pad(d.getHours());mm.textContent=pad(d.getMinutes());ss.textContent=pad(d.getSeconds());
+    cd.textContent=d.toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+  }
+  tick();setInterval(tick,1000);
+})();
+</script>
+</body>
+</html>
